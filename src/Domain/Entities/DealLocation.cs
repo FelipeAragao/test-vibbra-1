@@ -1,19 +1,18 @@
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace src.Domain.Entities
 {
-    [Table("UserLocations")]
-    public class UserLocation
+    [Table("DealLocation")]
+    public class DealLocation
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int UserLocationId { get; set; }
+        public int DealLocationId { get; set; }
 
-        [ForeignKey("User")]
         [Required]
-        public int UserId { get; set; }
+        [ForeignKey("Deal")]
+        public required int DealId { get; set; }
 
         [Required]
         public double Lat { get; set; }
@@ -35,8 +34,5 @@ namespace src.Domain.Entities
 
         [Required]
         public int ZipCode { get; set; }
-
-        [Required]
-        public bool Active { get; set; }
     }
 }

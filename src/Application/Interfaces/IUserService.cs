@@ -9,6 +9,12 @@ namespace src.Application.Interfaces
 {
     public interface IUserService
     {
-        User? Login(LoginDTO loginDTO);
+        Task<UserDTO?> Login(LoginDTO loginDTO);
+
+        Task<UserDTO> Add(UserDTO user);
+
+        Task<UserDTO> Update(UserDTO user);
+
+        Task<UserDTO> Get(int id);
     }
 }

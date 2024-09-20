@@ -1,31 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using src.Application.DTOs;
-using src.Application.Interfaces;
-using src.Application.Services;
-using src.Infrastructure.Db;
+using EcommerceVibbra;
 
-var builder = WebApplication.CreateBuilder(args);
+IHostBuilder CreateHostBuilder(string[] args) {
+    return Host.CreateDefaultBuilder(args)
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
+}
 
-builder.Services.AddScoped<IUserService, UserService>();
-
-builder.Services.AddDbContext<MyDbContext>(options => {
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("MySql"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySql")));
-});
-
-var app = builder.Build();
-
-app.MapGet("/", () => "Hello World!");
-
-app.MapPost("/login", ([FromBody] LoginDTO loginDTO, IUserService userService) => {
-    var user = userService.Login(loginDTO);
-
-    if(user != null)
-        return Results.Ok(user);
-    else
-        return Results.Unauthorized();
-});
-
-app.Run();
+CreateHostBuilder(args).Build().Run();

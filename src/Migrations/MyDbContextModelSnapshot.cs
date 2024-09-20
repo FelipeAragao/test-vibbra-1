@@ -31,8 +31,8 @@ namespace EcommerceVibbra.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Login")
                         .IsRequired()
@@ -41,8 +41,8 @@ namespace EcommerceVibbra.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -72,15 +72,18 @@ namespace EcommerceVibbra.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("UserLocationId"));
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<double>("Lat")
                         .HasColumnType("double");
@@ -103,12 +106,13 @@ namespace EcommerceVibbra.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLocation");
+                    b.ToTable("UserLocations");
 
                     b.HasData(
                         new
                         {
                             UserLocationId = 1,
+                            Active = false,
                             Address = "123 Main St",
                             City = "São Paulo",
                             Lat = -23.550519999999999,

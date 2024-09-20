@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace src.Domain.Entities
 {
+    [Table("Users")]
     public class User
     {
         [Key]
@@ -28,5 +29,15 @@ namespace src.Domain.Entities
         public required string Password { get; set; }
 
         public required List<UserLocation> Locations { get; set; }
+
+        public List<Deal>? Deals { get; set; }
+
+        public List<Bid>? Bids { get; set; }
+
+        public List<Message>? Messages { get; set; }
+
+        public List<Invite>? InvitesSent { get; set; }
+
+        public List<Invite>? InvitesReceived { get; set; }
     }
 }
