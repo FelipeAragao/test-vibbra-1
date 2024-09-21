@@ -1,14 +1,13 @@
-using AutoBogus;
 using src.Application.DTOs;
 using src.Application.Services;
 using src.Infrastructure.Db;
-using Tests.Configuration;
 using src.Domain.Enums;
-using Xunit;
+using Tests.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Tests.Services
 {
-    public class DealServiceTest
+    public class DealServiceTest : IClassFixture<DbContextFixture>
     {
         private readonly MyDbContext _dbContext;
 
@@ -22,27 +21,11 @@ namespace Tests.Services
         {
             // Create user on Database
             UserService userService = new UserService(this._dbContext);
-            UserDTO userDTO = new AutoFaker<UserDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(u => u.Name, faker => faker.Person.FullName)
-                .RuleFor(u => u.Login, faker => faker.Person.UserName)
-                .RuleFor(u => u.Email, faker => faker.Person.Email);
-            LocationDTO locationDTO = new AutoFaker<LocationDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(l => l.Address, faker => faker.Address.StreetAddress())
-                .RuleFor(l => l.City, faker => faker.Address.City())
-                .RuleFor(l => l.State, faker => faker.Address.State())
-                .RuleFor(l => l.Lat, faker => faker.Address.Latitude())
-                .RuleFor(l => l.Lng, faker => faker.Address.Longitude());
-            userDTO.Location = locationDTO;
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
             UserDTO userDTOInserted = await userService.Add(userDTO);
 
-            // Create Deal for the User
-            DealDTO dealDTO = new AutoFaker<DealDTO>(AutoBogusConfiguration.LOCATE);
-            dealDTO.UserId = userDTOInserted.UserId;
-            dealDTO.Type = DealType.Venda;
-            dealDTO.UrgencyType = DealUrgencyType.Baixa;
-            dealDTO.Location = locationDTO;
-
-            return dealDTO;
+            // Return DealDTO
+            return RandomDataGenerator.GenerateDealDTO(userDTOInserted.UserId);
         }
 
         [Fact]
@@ -69,7 +52,8 @@ namespace Tests.Services
             // Act
             var dealInserted = await dealService.Add(dealDTO);
             dealInserted.UrgencyType = DealUrgencyType.Alta;
-            var dealUpdated = await dealService.Update(dealInserted);
+            await dealService.Update(dealInserted);
+            var dealUpdated = await dealService.Get(dealInserted.DealId);
 
             // Assert
             Assert.Equal(DealUrgencyType.Alta, dealUpdated.UrgencyType);
@@ -89,6 +73,22 @@ namespace Tests.Services
             // Assert
             Assert.NotNull(dealGet);
             Assert.Equivalent(dealInserted, dealGet);
+        }
+
+        [Fact]
+        public async void Get_FindInvalidId_ThrowException()
+        {
+            // Arrange
+            var dealService = new DealService(this._dbContext);
+            DealDTO dealDTO = await this.CreateDealDTO();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await dealService.Get(76585604)
+            );
+
+            // Assert
+            Assert.Equal("Deal not found", exception.Message);
         }
     }
 }

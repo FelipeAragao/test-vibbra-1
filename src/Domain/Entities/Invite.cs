@@ -11,11 +11,9 @@ namespace src.Domain.Entities
         public int InviteId { get; set; }
 
         [Required]
-        [ForeignKey("User")]
         public required int UserId { get; set; }
 
         [Required]
-        [ForeignKey("User")]
         public required int UserInvitedId { get; set; }
 
         [Required]
@@ -26,5 +24,9 @@ namespace src.Domain.Entities
         [EmailAddress]
         [StringLength(100)]
         public required string Email { get; set; }
+
+        public User? User { get; set; }
+        
+        public User? UserInvited { get; set; }
     }
 }

@@ -4,9 +4,9 @@ namespace src.Application.Interfaces
 {
     public interface IBidService
     {
-        Task<BidDTO> Add(BidDTO user);
+        Task<BidDTO> Add(BidDTO bid);
 
-        Task<BidDTO> Update(BidDTO user);
+        Task<BidDTO> Update(BidDTO bid);
 
         Task<BidDTO> Get(int id);
 

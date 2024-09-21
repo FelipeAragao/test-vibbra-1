@@ -15,9 +15,16 @@ namespace src.Infrastructure.Db
 
         public DbSet<User> Users { get; set; }
         public DbSet<Deal> Deals { get; set; }
+        public DbSet<Bid> Bids { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Invite> Invites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserId)
+                .ValueGeneratedOnAdd();
+
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Locations)
                 .WithOne()
@@ -42,17 +49,17 @@ namespace src.Infrastructure.Db
                 .HasForeignKey(m => m.UserId)
                 .IsRequired();
 
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.InvitesSent)
-                .WithOne()
+            modelBuilder.Entity<Invite>()
+                .HasOne(i => i.User)
+                .WithMany(u => u.InvitesSent)
                 .HasForeignKey(i => i.UserId)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.InvitesReceived)
-                .WithOne()
+            modelBuilder.Entity<Invite>()
+                .HasOne(i => i.UserInvited)
+                .WithMany(u => u.InvitesReceived)
                 .HasForeignKey(i => i.UserInvitedId)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>().HasData(new User {
                 UserId = 1,

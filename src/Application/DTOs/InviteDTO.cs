@@ -16,7 +16,5 @@ namespace src.Application.DTOs
         public UserDTO? User { get; set; }
 
         public UserDTO? UserInvited { get; set; }
-
-
     }
 }

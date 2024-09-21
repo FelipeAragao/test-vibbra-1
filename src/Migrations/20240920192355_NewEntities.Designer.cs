@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using src.Infrastructure.Db;
 
@@ -10,9 +11,11 @@ using src.Infrastructure.Db;
 namespace EcommerceVibbra.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240920192355_NewEntities")]
+    partial class NewEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -368,21 +371,17 @@ namespace EcommerceVibbra.Migrations
 
             modelBuilder.Entity("src.Domain.Entities.Invite", b =>
                 {
-                    b.HasOne("src.Domain.Entities.User", "User")
+                    b.HasOne("src.Domain.Entities.User", null)
                         .WithMany("InvitesSent")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("src.Domain.Entities.User", "UserInvited")
+                    b.HasOne("src.Domain.Entities.User", null)
                         .WithMany("InvitesReceived")
                         .HasForeignKey("UserInvitedId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("UserInvited");
                 });
 
             modelBuilder.Entity("src.Domain.Entities.Message", b =>

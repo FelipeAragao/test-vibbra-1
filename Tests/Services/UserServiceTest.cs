@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoBogus;
 using src.Application.DTOs;
 using src.Application.Services;
-using src.Domain.Entities;
 using src.Infrastructure.Db;
-using Tests.Configuration;
-using Xunit;
+using Tests.Utilities;
 
 namespace Tests.Services
 {
@@ -20,24 +13,7 @@ namespace Tests.Services
         {
             this._dbContext = fixture.DbContext;
         }
-
-        public UserDTO CreateUserDTO()
-        {
-            UserDTO userDTO = new AutoFaker<UserDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(u => u.Name, faker => faker.Person.FullName)
-                .RuleFor(u => u.Login, faker => faker.Person.UserName)
-                .RuleFor(u => u.Email, faker => faker.Person.Email);
-            LocationDTO locationDTO = new AutoFaker<LocationDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(l => l.Address, faker => faker.Address.StreetAddress())
-                .RuleFor(l => l.City, faker => faker.Address.City())
-                .RuleFor(l => l.State, faker => faker.Address.State())
-                .RuleFor(l => l.Lat, faker => faker.Address.Latitude())
-                .RuleFor(l => l.Lng, faker => faker.Address.Longitude());
-            userDTO.Location = locationDTO;
-
-            return userDTO;
-        }
-
+        
         [Fact]
         public async void Login_WhenTryToLoginWithLoginAndPasswordCorrect_ReturnTheUser()
         {
@@ -77,43 +53,48 @@ namespace Tests.Services
         {
             // Arrange
             var userService = new UserService(this._dbContext);
-            UserDTO userDTO = this.CreateUserDTO();
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
 
             // Act
             var user = await userService.Add(userDTO);
 
             // Assert
-            Assert.Equivalent(user, userDTO);
+            Assert.True(user.UserId > 0);
         }
 
         [Fact]
-        public async void Add_EnteringAllValidDataAndLoginThatExists_ReturnNull()
+        public async void Add_EnteringAllValidDataAndLoginThatExists_ThrowException()
         {
             // Arrange
             var userService = new UserService(this._dbContext);
-            UserDTO userDTO = this.CreateUserDTO();
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
             userDTO.Login = "teste";
 
             // Act
-            var user = await userService.Add(userDTO);
+            var exception = await Assert.ThrowsAsync<Exception>(async () => 
+            {
+                await userService.Add(userDTO);
+            });
 
             // Assert
-            Assert.Null(user);
+            Assert.Equal("Login already exists", exception.Message);
         }
 
         [Fact]
-        public async void Add_EnteringAllValidDataWithoutLocation_ReturnNull()
+        public async void Add_EnteringAllValidDataWithoutLocation_ThrowException()
         {
             // Arrange
             var userService = new UserService(this._dbContext);
-            UserDTO userDTO = this.CreateUserDTO();
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
             userDTO.Location = null;
 
             // Act
-            var user = await userService.Add(userDTO);
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await userService.Add(userDTO)
+            );
 
             // Assert
-            Assert.Null(user);
+            Assert.Equal("The location is incomplete or blank", exception.Message);
         }
 
         [Fact]
@@ -130,16 +111,19 @@ namespace Tests.Services
         }
 
         [Fact]
-        public async void Get_FindInvalidId_ReturnUserDTO()
+        public async void Get_FindInvalidId_ThrowException()
         {
             // Arrange
             var userService = new UserService(this._dbContext);
 
             // Act
-            var userDTO = await userService.Get(10000);
+            var exception = await Assert.ThrowsAsync<Exception>(async () => 
+            {
+                await userService.Get(85045);
+            });
 
             // Assert
-            Assert.Null(userDTO);
+            Assert.Equal("User not found", exception.Message);
         }
 
         [Fact]
@@ -147,28 +131,36 @@ namespace Tests.Services
         {
             // Arrange
             var userService = new UserService(this._dbContext);
-            UserDTO userDTO = this.CreateUserDTO();
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
 
             // Act
-            var userUpdate = await userService.Update(userDTO);
+            await userService.Add(userDTO);
+            userDTO.Email = "another@email.com";
+            userDTO.Name = "New Name";
+            await userService.Update(userDTO);
+            var updatedUser = await userService.Get(userDTO.UserId);
 
             // Assert
-            Assert.Equivalent(userUpdate, userDTO);
+            Assert.Equal("another@email.com", updatedUser.Email);
+            Assert.Equal("New Name", updatedUser.Name);
         }
 
         [Fact]
-        public async void Update_EnteringAllValidDataAndReplaceLogin_ReturnNull()
+        public async void Update_EnteringAllValidDataAndReplacingLogin_ThrowException()
         {
             // Arrange
             var userService = new UserService(this._dbContext);
+            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
 
             // Act
-            UserDTO userDTO = await userService.Get(1);
-            userDTO.Login = "outro";
-            UserDTO userUpdate = await userService.Update(userDTO);
+            await userService.Add(userDTO);
+            userDTO.Login = "another.login";
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await userService.Update(userDTO)
+            );
 
             // Assert
-            Assert.Null(userUpdate);
+            Assert.Equal("Login can't be changed", exception.Message);
         }
     }
 }

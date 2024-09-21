@@ -1,5 +1,7 @@
 using src.Application.DTOs;
 using src.Application.Interfaces;
+using src.Application.Mappers;
+using src.Domain.Entities;
 using src.Infrastructure.Db;
 
 namespace src.Application.Services
@@ -13,19 +15,55 @@ namespace src.Application.Services
             this._context = context;
         }
 
-        public Task<DealDTO> Add(DealDTO user)
+        public async Task<DealDTO> Add(DealDTO deal)
         {
-            throw new NotImplementedException();
+            // Validates
+            // Check if user has location
+            if (deal.Location == null)
+            {
+                throw new Exception("The location is incomplete or blank");
+            }
+
+            var dealEntity = DealMapper.ToEntity(deal);
+            await this._context.AddAsync(dealEntity);
+            await this._context.SaveChangesAsync();
+
+            // Update DealDTO
+            deal.DealId = dealEntity.DealId;
+            for(int i = 0; i < dealEntity.DealImages.Count; i++)
+            {
+                deal.DealImages[i].DealImageId = dealEntity.DealImages[i].DealImageId;
+                deal.DealImages[i].DealId = dealEntity.DealImages[i].DealId;
+            }
+            return deal;
         }
 
-        public Task<DealDTO> Update(DealDTO user)
+        public async Task<DealDTO> Update(DealDTO deal)
         {
-            throw new NotImplementedException();
+            // Look for the deal
+            var existingDeal = await _context.Deals.FindAsync(deal.DealId);
+            if (existingDeal == null)
+            {
+                throw new Exception("Deal not found");
+            }
+
+            // Update the deal's properties
+            DealMapper.UpdateEntityFromDTO(existingDeal, deal);
+
+            // Update
+            await _context.SaveChangesAsync();
+
+            return deal;
         }
 
-        public Task<DealDTO?> Get(int id)
+        public async Task<DealDTO> Get(int id)
         {
-            throw new NotImplementedException();
+            var deal = await _context.Deals.FindAsync(id);
+            if(deal == null)
+            {
+                throw new Exception("Deal not found");
+            }
+            return DealMapper.ToDTO(deal);
         }
     }
 }

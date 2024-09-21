@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using src.Application.DTOs;
 using src.Application.Interfaces;
+using src.Application.Mappers;
 using src.Domain.Entities;
 using src.Infrastructure.Db;
 
@@ -27,42 +28,65 @@ namespace src.Application.Services
             UserDTO? userDTO = null;
             if(user != null)
             {
-                LocationDTO? locationDTO = null;
-                if(user.Locations != null)
-                    locationDTO = new LocationDTO() {
-                    Lat = user.Locations[0].Lat,
-                    Lng = user.Locations[0].Lat,
-                    Address = user.Locations[0].Address,
-                    City = user.Locations[0].City,
-                    State = user.Locations[0].State,
-                    ZipCode = user.Locations[0].ZipCode
-                };
-
-                userDTO = new UserDTO() {
-                    UserId = user.UserId,
-                    Name = user.Name,
-                    Email = user.Email,
-                    Login = user.Login,
-                    Password = user.Password,
-                    Location = locationDTO
-                };
+                userDTO = UserMapper.ToDTO(user);
             }
             return userDTO;
         }
 
-        public Task<UserDTO> Add(UserDTO user)
+        public async Task<UserDTO> Add(UserDTO user)
         {
-            throw new NotImplementedException();
+            // Validates
+            // Check if user has location
+            if (user.Location == null)
+            {
+                throw new Exception("The location is incomplete or blank");
+            }
+            // Check if login already exists
+            bool loginExists = await _context.Users.AnyAsync(u => u.Login == user.Login);
+            if (loginExists)
+            {
+                throw new Exception("Login already exists");
+            }
+
+            // Add user
+            var userEntity = UserMapper.ToEntity(user);
+            await this._context.Users.AddAsync(userEntity);
+            await this._context.SaveChangesAsync();
+            user.UserId = userEntity.UserId;
+            return user;
         }
 
-        public Task<UserDTO> Update(UserDTO user)
+        public async Task<UserDTO> Update(UserDTO user)
         {
-            throw new NotImplementedException();
+            // Look for the user
+            var existingUser = await _context.Users.FindAsync(user.UserId);
+            if (existingUser == null)
+            {
+                throw new Exception("User not found");
+            }
+            // Validates
+            if (existingUser.Login != user.Login)
+            {
+                throw new Exception("Login can't be changed");
+            }
+
+            // Update the user's properties
+            UserMapper.UpdateEntityFromDTO(existingUser, user);
+
+            // Update
+            await _context.SaveChangesAsync();
+
+            return user;
         }
 
-        public Task<UserDTO> Get(int id)
+        public async Task<UserDTO> Get(int id)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.FindAsync(id);
+            if(user == null)
+            {
+                throw new Exception("User not found");
+            }
+            return UserMapper.ToDTO(user);
         }
     }
 }

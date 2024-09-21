@@ -5,11 +5,12 @@ using src.Domain.Entities;
 using src.Domain.Enums;
 using src.Infrastructure.Db;
 using Tests.Configuration;
+using Tests.Utilities;
 using Xunit;
 
 namespace Tests.Services
 {
-    public class BidServiceTest
+    public class BidServiceTest : IClassFixture<DbContextFixture>
     {
         private readonly MyDbContext _dbContext;
 
@@ -21,26 +22,14 @@ namespace Tests.Services
         /* Create a BidDTO with a user (created by the method or received) and a deal (created by the method or received) */
         public async Task<BidDTO> CreateBidDTO(int userIdForDeal = 0, int dealId = 0)
         {
-            // Create location for user and deal (if necessary)
-            LocationDTO locationDTO = new AutoFaker<LocationDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(l => l.Address, faker => faker.Address.StreetAddress())
-                .RuleFor(l => l.City, faker => faker.Address.City())
-                .RuleFor(l => l.State, faker => faker.Address.State())
-                .RuleFor(l => l.Lat, faker => faker.Address.Latitude())
-                .RuleFor(l => l.Lng, faker => faker.Address.Longitude());
+            UserService userService = new UserService(this._dbContext);
 
-            // User's treatment
-            int userIdForBid = userIdForDeal;
+            // Deal's user treatment
             if(userIdForDeal == 0)
             {
-                UserService userService = new UserService(this._dbContext);
-                UserDTO userDTO = new AutoFaker<UserDTO>(AutoBogusConfiguration.LOCATE)
-                    .RuleFor(u => u.Name, faker => faker.Person.FullName)
-                    .RuleFor(u => u.Login, faker => faker.Person.UserName)
-                    .RuleFor(u => u.Email, faker => faker.Person.Email);
-                userDTO.Location = locationDTO;
-                UserDTO userDTOInserted = await userService.Add(userDTO);
-                userIdForBid = userDTOInserted.UserId;
+                UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
+                await userService.Add(userDTO);
+                userIdForDeal = userDTO.UserId;
             }
 
             // Deal's treatment
@@ -48,21 +37,18 @@ namespace Tests.Services
             if(dealId == 0)
             {
                 DealService dealService = new DealService(this._dbContext);
-                DealDTO dealDTO = new AutoFaker<DealDTO>(AutoBogusConfiguration.LOCATE);
-                dealDTO.UserId = userIdForBid;
-                dealDTO.Type = DealType.Venda;
-                dealDTO.UrgencyType = DealUrgencyType.Baixa;
-                dealDTO.Location = locationDTO;
+                DealDTO dealDTO = RandomDataGenerator.GenerateDealDTO(userIdForDeal);
                 DealDTO dealDTOInserted = await dealService.Add(dealDTO);
                 dealIdForBid = dealDTOInserted.DealId;
             }
 
-            // Create Bid
-            BidDTO bidDTO = new AutoFaker<BidDTO>(AutoBogusConfiguration.LOCATE);
-            bidDTO.UserId = userIdForBid;
-            bidDTO.DealId = dealIdForBid;
+            // Bid's user treatment
+            UserDTO bidUserDTO = RandomDataGenerator.GenerateUserDTO();
+            await userService.Add(bidUserDTO);
+            int userIdForBid = bidUserDTO.UserId;
 
-            return bidDTO;
+            // Create Bid
+            return RandomDataGenerator.GenerateBidDTO(userIdForBid, dealIdForBid);
         }
 
         [Fact]
@@ -73,11 +59,11 @@ namespace Tests.Services
             BidDTO bidDTO = await this.CreateBidDTO();
 
             // Act
-            var dealInserted = await bidService.Add(bidDTO);
+            await bidService.Add(bidDTO);
 
             // Assert
-            Assert.NotNull(dealInserted);
-            Assert.True(dealInserted.DealId > 0 ? true : false);
+            Assert.NotNull(bidDTO);
+            Assert.True(bidDTO.DealId > 0 ? true : false);
         }
 
         [Fact]
@@ -97,16 +83,18 @@ namespace Tests.Services
         }
 
         [Fact]
-        public async void Get_FindInvalidId_ReturnNull()
+        public async void Get_FindInvalidId_ThrowException()
         {
             // Arrange
             var bidService = new BidService(this._dbContext);
 
             // Act
-            var dealGet = await bidService.Get(80000);
-
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await bidService.Get(80000)
+            );
+            
             // Assert
-            Assert.Null(dealGet);
+            Assert.Equal("Bid not found", exception.Message);
         }
 
         [Fact]
@@ -117,14 +105,14 @@ namespace Tests.Services
             BidDTO bidDTO = await this.CreateBidDTO();
 
             // Act
-            var dealInserted = await bidService.Add(bidDTO);
-            var dealGet = await bidService.Get(dealInserted.BidId);
-            BidDTO dealPut;
-            dealGet.Value = 150.15M;
-            dealPut = await bidService.Update(dealGet);
+            await bidService.Add(bidDTO);
+            bidDTO.Value = 150.15M;
+            await bidService.Update(bidDTO);
+            var dealUpdated = await bidService.Get(bidDTO.BidId);
 
             // Assert
-            Assert.Equal(150.15M, dealPut.Value);
+            Assert.NotNull(dealUpdated);
+            Assert.Equal(150.15M, dealUpdated.Value);
         }
 
         [Fact]
@@ -145,6 +133,21 @@ namespace Tests.Services
             // Assert
             Assert.NotNull(dealGetAll);
             Assert.Equal(3, dealGetAll.Count);
+        }
+
+        [Fact]
+        public async void Get_FindAllByDealAndInvalidDealId_ThrowException()
+        {
+            // Arrange
+            var bidService = new BidService(this._dbContext);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await bidService.GetAllByDeal(2343634)
+            );
+
+            // Assert
+            Assert.Equal("Bids for deal not found", exception.Message);
         }
     }
 }

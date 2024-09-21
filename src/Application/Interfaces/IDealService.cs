@@ -4,9 +4,9 @@ namespace src.Application.Interfaces
 {
     public interface IDealService
     {
-        Task<DealDTO> Add(DealDTO user);
+        Task<DealDTO> Add(DealDTO deal);
 
-        Task<DealDTO> Update(DealDTO user);
+        Task<DealDTO> Update(DealDTO deal);
 
         Task<DealDTO> Get(int id);
     }

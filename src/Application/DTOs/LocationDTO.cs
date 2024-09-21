@@ -1,4 +1,6 @@
 
+using System.ComponentModel.DataAnnotations;
+
 namespace src.Application.DTOs
 {
     public class LocationDTO
@@ -11,6 +13,7 @@ namespace src.Application.DTOs
 
         public required string City { get; set; }
 
+        [StringLength(2, ErrorMessage = "The state cannot be longer than 2 characters.")]
         public required string State { get; set; }
 
         public int ZipCode { get; set; }

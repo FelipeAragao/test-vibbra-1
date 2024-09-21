@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using src.Application.DTOs;
 using src.Application.Interfaces;
+using src.Application.Mappers;
 using src.Infrastructure.Db;
 
 namespace src.Application.Services
@@ -13,24 +15,58 @@ namespace src.Application.Services
             this._context = context;
         }
         
-        public Task<InviteDTO> Add(InviteDTO user)
+        public async Task<InviteDTO> Add(InviteDTO inviteDTO)
         {
-            throw new NotImplementedException();
+            var inviteEntity = Mappers.InviteMapper.ToEntity(inviteDTO);
+            await this._context.AddAsync(inviteEntity);
+            await this._context.SaveChangesAsync();
+
+            // Update InviteDTO
+            inviteDTO.InviteId = inviteEntity.InviteId;
+            return inviteDTO;
         }
 
-        public Task<InviteDTO> Get(int id)
+        public async Task<InviteDTO> Get(int id)
         {
-            throw new NotImplementedException();
+            var invite = await _context.Invites.FindAsync(id);
+            if(invite == null)
+            {
+                throw new Exception("Invite not found");
+            }
+            return Mappers.InviteMapper.ToDTO(invite);
         }
 
-        public Task<List<InviteDTO>> GetAllByUser(int dealId)
+        public async Task<List<InviteDTO>> GetAllByUser(int userId)
         {
-            throw new NotImplementedException();
+            var listInvites = await _context.Invites.Where(b => b.UserId == userId).ToListAsync();
+            if(listInvites.Count == 0)
+            {
+                throw new Exception("Invites for user not found");
+            }
+            List<InviteDTO> listInvitesDTO = new List<InviteDTO>();
+            foreach(var invite in listInvites)
+            {
+                listInvitesDTO.Add(Mappers.InviteMapper.ToDTO(invite));
+            }
+            return listInvitesDTO;
         }
 
-        public Task<InviteDTO> Update(InviteDTO user)
+        public async Task<InviteDTO> Update(InviteDTO inviteDTO)
         {
-            throw new NotImplementedException();
+            // Look for the invite
+            var existingInvite = await _context.Invites.FindAsync(inviteDTO.InviteId);
+            if (existingInvite == null)
+            {
+                throw new Exception("Invite not found");
+            }
+
+            // Update the invite's properties
+            InviteMapper.UpdateEntityFromDTO(existingInvite, inviteDTO);
+
+            // Update
+            await _context.SaveChangesAsync();
+
+            return inviteDTO;
         }
     }
 }

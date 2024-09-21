@@ -9,10 +9,10 @@ public class DbContextFixture : IDisposable
 
     public DbContextFixture()
     {
-        DbContext = CriarContextoDeTeste();
+        DbContext = CreateTestContext();
     }
 
-    private MyDbContext CriarContextoDeTeste()
+    private MyDbContext CreateTestContext()
     {
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
 

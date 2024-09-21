@@ -4,10 +4,11 @@ using src.Application.Services;
 using src.Domain.Enums;
 using src.Infrastructure.Db;
 using Tests.Configuration;
+using Tests.Utilities;
 
 namespace Tests.Services
 {
-    public class MessageServiceTest
+    public class MessageServiceTest : IClassFixture<DbContextFixture>
     {
         private readonly MyDbContext _dbContext;
 
@@ -21,47 +22,24 @@ namespace Tests.Services
         {
             // User's treatment
             UserService userService = new UserService(this._dbContext);
-            UserDTO userDTO = new AutoFaker<UserDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(u => u.Name, faker => faker.Person.FullName)
-                .RuleFor(u => u.Login, faker => faker.Person.UserName)
-                .RuleFor(u => u.Email, faker => faker.Person.Email);
-            LocationDTO locationDTOUser = new AutoFaker<LocationDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(l => l.Address, faker => faker.Address.StreetAddress())
-                .RuleFor(l => l.City, faker => faker.Address.City())
-                .RuleFor(l => l.State, faker => faker.Address.State())
-                .RuleFor(l => l.Lat, faker => faker.Address.Latitude())
-                .RuleFor(l => l.Lng, faker => faker.Address.Longitude());
-            userDTO.Location = locationDTOUser;
-            UserDTO userDTOInserted = await userService.Add(userDTO);
-            int userIdForMessage = userDTOInserted.UserId;
+            UserDTO messageUserDTO = RandomDataGenerator.GenerateUserDTO();
+            await userService.Add(messageUserDTO);
+
+            UserDTO dealUserDTO = RandomDataGenerator.GenerateUserDTO();
+            await userService.Add(dealUserDTO);
 
             // Deal's treatment
             int dealIdForMessage = dealId;
             if(dealId == 0)
             {
                 DealService dealService = new DealService(this._dbContext);
-                DealDTO dealDTO = new AutoFaker<DealDTO>(AutoBogusConfiguration.LOCATE);
-                dealDTO.Type = DealType.Venda;
-                dealDTO.UrgencyType = DealUrgencyType.Baixa;
-                LocationDTO locationDTO = new AutoFaker<LocationDTO>(AutoBogusConfiguration.LOCATE)
-                    .RuleFor(l => l.Address, faker => faker.Address.StreetAddress())
-                    .RuleFor(l => l.City, faker => faker.Address.City())
-                    .RuleFor(l => l.State, faker => faker.Address.State())
-                    .RuleFor(l => l.Lat, faker => faker.Address.Latitude())
-                    .RuleFor(l => l.Lng, faker => faker.Address.Longitude());
-                dealDTO.Location = locationDTO;
-                DealDTO dealDTOInserted = await dealService.Add(dealDTO);
-                dealIdForMessage = dealDTOInserted.DealId;
+                DealDTO dealDTO = RandomDataGenerator.GenerateDealDTO(dealUserDTO.UserId);
+                await dealService.Add(dealDTO);
+                dealIdForMessage = dealDTO.DealId;
             }
 
-            // Create Bid
-            MessageDTO messageDTO = new AutoFaker<MessageDTO>(AutoBogusConfiguration.LOCATE)
-                .RuleFor(m => m.Title, faker => faker.Lorem.Lines(1))
-                .RuleFor(m => m.Message, faker => faker.Lorem.Lines(4));
-            messageDTO.UserId = userIdForMessage;
-            messageDTO.DealId = dealIdForMessage;
-
-            return messageDTO;
+            // Create Message
+            return RandomDataGenerator.GenerateMessageDTO(messageUserDTO.UserId, dealIdForMessage);
         }
 
         [Fact]
@@ -72,11 +50,10 @@ namespace Tests.Services
             MessageDTO messageDTO = await this.CreateMessageDTO();
 
             // Act
-            var messageInserted = await messageService.Add(messageDTO);
+            await messageService.Add(messageDTO);
 
             // Assert
-            Assert.NotNull(messageInserted);
-            Assert.True(messageInserted.MessageId > 0 ? true : false);
+            Assert.True(messageDTO.MessageId > 0 ? true : false);
         }
 
         [Fact]
@@ -87,25 +64,29 @@ namespace Tests.Services
             MessageDTO messageDTO = await this.CreateMessageDTO();
 
             // Act
-            var messageInserted = await messageService.Add(messageDTO);
-            var messageGet = await messageService.Get(messageInserted.MessageId);
+            await messageService.Add(messageDTO);
+            var messageGet = await messageService.Get(messageDTO.MessageId);
 
             // Assert
             Assert.NotNull(messageGet);
-            Assert.Equivalent(messageGet, messageInserted);
+            Assert.Equivalent(messageGet, messageDTO);
         }
 
         [Fact]
-        public async void Get_FindInvalidId_ReturnNull()
+        public async void Get_FindInvalidId_ThrowException()
         {
             // Arrange
             var messageService = new MessageService(this._dbContext);
+            MessageDTO messageDTO = await this.CreateMessageDTO();
 
             // Act
-            var messageGet = await messageService.Get(90305);
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await messageService.Get(56776788)
+            );
+            
 
             // Assert
-            Assert.Null(messageGet);
+            Assert.Equal("Message not found", exception.Message);
         }
 
         [Fact]
@@ -116,13 +97,14 @@ namespace Tests.Services
             MessageDTO messageDTO = await this.CreateMessageDTO();
 
             // Act
-            var messageInserted = await messageService.Add(messageDTO);
-            var messageGet = await messageService.Get(messageInserted.MessageId);
-            messageGet.Message = "Other message for this deal";
-            var messagePut = await messageService.Update(messageGet);
+            await messageService.Add(messageDTO);
+            messageDTO.Message = "Other message for this deal";
+            await messageService.Update(messageDTO);
+            var messageGet = await messageService.Get(messageDTO.MessageId);
 
             // Assert
-            Assert.Equal("Other message for this deal", messagePut.Message);
+            Assert.Equal("Other message for this deal", messageGet.Message);
+            Assert.Equivalent(messageGet, messageDTO);
         }
 
         [Fact]
@@ -143,6 +125,21 @@ namespace Tests.Services
             // Assert
             Assert.NotNull(msgGetAll);
             Assert.Equal(3, msgGetAll.Count);
+        }
+
+        [Fact]
+        public async void Get_FindAllByDealAndInvalidDealId_ThrowException()
+        {
+            // Arrange
+            var MessageService = new MessageService(this._dbContext);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await MessageService.GetAllByDeal(86858586)
+            );
+
+            // Assert
+            Assert.Equal("Messages for deal not found", exception.Message);
         }
     }
 }
