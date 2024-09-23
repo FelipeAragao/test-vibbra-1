@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using src.Domain.Entities;
+using src.Infrastructure.Security;
 
 namespace src.Infrastructure.Db
 {
@@ -61,12 +62,14 @@ namespace src.Infrastructure.Db
                 .HasForeignKey(i => i.UserInvitedId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            byte[] salt = PasswordHasher.GenerateSalt();
+            
             modelBuilder.Entity<User>().HasData(new User {
                 UserId = 1,
                 Name = "Teste",
                 Email = "teste@gmail.com",
                 Login = "teste",
-                Password = "123",
+                Password = PasswordHasher.HashPassword("123", salt),
                 Locations = new List<UserLocation>(),
                 Deals = null,
                 Bids = null

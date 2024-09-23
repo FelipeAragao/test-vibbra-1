@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using src.Application.DTOs;
 using src.Application.Interfaces;
 using src.Application.Mappers;
-using src.Domain.Entities;
 using src.Infrastructure.Db;
+using src.Infrastructure.Security;
 
 namespace src.Application.Services
 {
@@ -18,19 +18,6 @@ namespace src.Application.Services
         public UserService(MyDbContext context)
         {
             this._context = context;
-        }
-
-        public async Task<UserDTO?> Login(LoginDTO loginDTO)
-        {   
-            var user = await this._context.Users.Where(x => x.Login == loginDTO.Login && x.Password == loginDTO.Password)
-                .Include(u => u.Locations)
-                .FirstOrDefaultAsync();
-            UserDTO? userDTO = null;
-            if(user != null)
-            {
-                userDTO = UserMapper.ToDTO(user);
-            }
-            return userDTO;
         }
 
         public async Task<UserDTO> Add(UserDTO user)
@@ -48,6 +35,10 @@ namespace src.Application.Services
                 throw new Exception("Login already exists");
             }
 
+            // Hash password
+            byte[] salt = PasswordHasher.GenerateSalt();
+            user.Password = PasswordHasher.HashPassword(user.Password, salt);
+
             // Add user
             var userEntity = UserMapper.ToEntity(user);
             await this._context.Users.AddAsync(userEntity);
@@ -60,14 +51,20 @@ namespace src.Application.Services
         {
             // Look for the user
             var existingUser = await _context.Users.FindAsync(user.UserId);
-            if (existingUser == null)
+            if(existingUser == null)
             {
                 throw new Exception("User not found");
             }
             // Validates
-            if (existingUser.Login != user.Login)
+            if(existingUser.Login != user.Login)
             {
                 throw new Exception("Login can't be changed");
+            }
+
+            if(existingUser.Password != user.Password)
+            {
+                byte[] salt = PasswordHasher.GenerateSalt();
+                user.Password = PasswordHasher.HashPassword(user.Password, salt);
             }
 
             // Update the user's properties

@@ -247,8 +247,8 @@ namespace EcommerceVibbra.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("UserId");
 
@@ -261,7 +261,7 @@ namespace EcommerceVibbra.Migrations
                             Email = "teste@gmail.com",
                             Login = "teste",
                             Name = "Teste",
-                            Password = "123"
+                            Password = "MsEkloY7sm15dfU37IvOi66ianpBCu28vm7H8GtMy+g=:Fk81x1cHJcus5mIKlDFiyQ=="
                         });
                 });
 

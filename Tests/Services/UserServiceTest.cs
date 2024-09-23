@@ -13,40 +13,6 @@ namespace Tests.Services
         {
             this._dbContext = fixture.DbContext;
         }
-        
-        [Fact]
-        public async void Login_WhenTryToLoginWithLoginAndPasswordCorrect_ReturnTheUser()
-        {
-            // Arrange
-            var userService = new UserService(this._dbContext);
-            var loginDTO = new LoginDTO() {
-                Login = "teste",
-                Password = "123"
-            };
-
-            // Act
-            var userDTO = await userService.Login(loginDTO);
-
-            // Assert
-            Assert.NotNull(userDTO);
-        }
-
-        [Fact]
-        public async void Login_WhenTryToLoginWithLoginAndPasswordCorrect_ReturnNull()
-        {
-            // Arrange
-            var userService = new UserService(this._dbContext);
-            var loginDTO = new LoginDTO() {
-                Login = "teste_erro",
-                Password = "1234"
-            };
-
-            // Act
-            var userDTO = await userService.Login(loginDTO);
-
-            // Assert
-            Assert.Null(userDTO);
-        }
 
         [Fact]
         public async void Add_EnteringAllValidDataAndLoginThatNotExists_ReturnUserDTO()

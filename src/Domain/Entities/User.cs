@@ -25,7 +25,7 @@ namespace src.Domain.Entities
         public required string Login { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [StringLength(255)]
         public required string Password { get; set; }
 
         public required List<UserLocation> Locations { get; set; }

@@ -11,8 +11,8 @@ using src.Infrastructure.Db;
 namespace EcommerceVibbra.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20240921035816_DBUpdate")]
-    partial class DBUpdate
+    [Migration("20240922125329_CreateBase")]
+    partial class CreateBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -250,8 +250,8 @@ namespace EcommerceVibbra.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("UserId");
 
@@ -264,7 +264,7 @@ namespace EcommerceVibbra.Migrations
                             Email = "teste@gmail.com",
                             Login = "teste",
                             Name = "Teste",
-                            Password = "123"
+                            Password = "MsEkloY7sm15dfU37IvOi66ianpBCu28vm7H8GtMy+g=:Fk81x1cHJcus5mIKlDFiyQ=="
                         });
                 });
 
