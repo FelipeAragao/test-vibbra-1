@@ -65,7 +65,7 @@ namespace Tests.Services
 
             // Act
             await messageService.Add(messageDTO);
-            var messageGet = await messageService.Get(messageDTO.MessageId);
+            var messageGet = await messageService.Get(messageDTO.DealId, messageDTO.MessageId);
 
             // Assert
             Assert.NotNull(messageGet);
@@ -81,16 +81,16 @@ namespace Tests.Services
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await messageService.Get(56776788)
+                await messageService.Get(235, 56776788)
             );
             
 
             // Assert
-            Assert.Equal("Message not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Message not found or Deal not correspond to message. Check the data.", exception.Message);
         }
 
         [Fact]
-        public async void Put_EnteringAllValidData_ReturnMessageDTO()
+        public async void Update_EnteringAllValidData_ReturnMessageDTO()
         {
             // Arrange
             var messageService = new MessageService(this._dbContext);
@@ -100,7 +100,7 @@ namespace Tests.Services
             await messageService.Add(messageDTO);
             messageDTO.Message = "Other message for this deal";
             await messageService.Update(messageDTO);
-            var messageGet = await messageService.Get(messageDTO.MessageId);
+            var messageGet = await messageService.Get(messageDTO.DealId, messageDTO.MessageId);
 
             // Assert
             Assert.Equal("Other message for this deal", messageGet.Message);
@@ -139,7 +139,7 @@ namespace Tests.Services
             );
 
             // Assert
-            Assert.Equal("Messages for deal not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Messages for deal not found", exception.Message);
         }
     }
 }

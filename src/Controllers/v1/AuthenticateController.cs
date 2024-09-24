@@ -19,12 +19,12 @@ namespace src.Controllers.v1
     [Route("api/v1/[controller]")]
     public class AuthenticateController : Controller
     {
-        private readonly ILoginService _loginService;
+        private readonly IUserService _userService;
         private readonly JwtSettings _jwtSettings;
 
-        public AuthenticateController(ILoginService loginService, IOptions<JwtSettings> jwtSettings)
+        public AuthenticateController(IUserService userService, IOptions<JwtSettings> jwtSettings)
         {
-            this._loginService = loginService;
+            this._userService = userService;
             this._jwtSettings = jwtSettings.Value;
         }
 
@@ -46,7 +46,7 @@ namespace src.Controllers.v1
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        [HttpPost("")]
+        [HttpPost()]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
             if (loginDTO == null)
@@ -54,7 +54,7 @@ namespace src.Controllers.v1
                 return BadRequest(new { error = "Invalid login data" });
             }
 
-            var userDTO = await this._loginService.Login(loginDTO);
+            var userDTO = await this._userService.Login(loginDTO);
             if (userDTO != null)
             {
                 var claims = new List<Claim>() {
@@ -62,9 +62,9 @@ namespace src.Controllers.v1
                     new Claim("Email", userDTO.Email)
                 };
                 string token = GenerateJwtToken(claims);
-                return Ok(new {
-                    token = token,
-                    user = userDTO
+                return Ok(new TokenDTO {
+                    Token = token,
+                    User = userDTO
                 });
             }
             else
@@ -76,18 +76,6 @@ namespace src.Controllers.v1
         [HttpGet("sso")]
         public IActionResult LoginGoogle()
         {
-            /*
-            var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            if (authenticateResult.Succeeded)
-            {
-                // Authenticated user yet, return token
-                var userClaims = authenticateResult.Principal.Claims;
-                var token = GenerateJwtToken(userClaims);
-
-                return Ok(new { token });
-            }
-*/
             // Redirect to Google Callback
             var redirectUrl = Url.Action("LoginGoogleCallback", "Authenticate");
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
@@ -103,19 +91,50 @@ namespace src.Controllers.v1
                 var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 if (result?.Succeeded == true)
                 {
-                    // User's authenticated data
                     var userClaims = result.Principal.Claims;
+                    var nameClaim = User.FindFirst(ClaimTypes.Name)?.Value;
+                    var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                    var token = GenerateJwtToken(userClaims);
-                    return Ok(new { token });
+                    if (nameClaim == null || emailClaim == null)
+                    {
+                        return Unauthorized(new { error = "Unauthorized. Invalid name or e-mail." });
+                    }
+
+                    // Get or add the new user
+                    var userDTO = await this._userService.GetByLogin(emailClaim);
+                    if (userDTO == null)
+                    {
+                        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%¨&*()-=_+,.<>?|[]{}";
+                        var random = new Random();
+                        string password = new string(Enumerable.Repeat(chars, 10)
+                            .Select(s => s[random.Next(s.Length)]).ToArray());
+
+                        userDTO = new UserDTO() {
+                            Name = nameClaim,
+                            Email = emailClaim,
+                            Login = emailClaim,
+                            Password = password
+                        };
+
+                        await this._userService.Add(userDTO);
+                    }
+
+                    var claims = new List<Claim>() {
+                        new Claim("Login", userDTO.Login),
+                        new Claim("Email", userDTO.Email)
+                    };
+                    string token = GenerateJwtToken(claims);
+                    return Ok(new TokenDTO {
+                        Token = token,
+                        User = userDTO
+                    });
                 }
                 return Unauthorized(new { error = "Unauthorized" });
             }
             catch (Exception ex)
             {
                 // Log do erro e detalhes
-                Console.WriteLine(ex.Message);
-                return BadRequest(new { error = "An error occurred during the Google login process." });
+                return BadRequest(new { error = "An error occurred during the Google login process. " + ex.Message });
             }
         }
 

@@ -8,7 +8,7 @@ namespace src.Application.Interfaces
 
         Task<BidDTO> Update(BidDTO bid);
 
-        Task<BidDTO> Get(int id);
+        Task<BidDTO> Get(int dealId, int bidId);
 
         Task<List<BidDTO>> GetAllByDeal(int dealId);
     }

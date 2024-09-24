@@ -9,10 +9,14 @@ namespace src.Application.Interfaces
 {
     public interface IUserService
     {
+        Task<UserDTO?> Login(LoginDTO loginDTO);
+
         Task<UserDTO> Add(UserDTO user);
 
         Task<UserDTO> Update(UserDTO user);
 
-        Task<UserDTO> Get(int id);
+        Task<UserDTO> Get(int userId);
+
+        Task<UserDTO?> GetByLogin(string login);
     }
 }

@@ -75,7 +75,7 @@ namespace Tests.Services
 
             // Act
             var dealInserted = await bidService.Add(bidDTO);
-            var dealGet = await bidService.Get(dealInserted.BidId);
+            var dealGet = await bidService.Get(dealInserted.DealId, dealInserted.BidId);
 
             // Assert
             Assert.NotNull(dealGet);
@@ -90,11 +90,11 @@ namespace Tests.Services
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await bidService.Get(80000)
+                await bidService.Get(20, 80000)
             );
             
             // Assert
-            Assert.Equal("Bid not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Bid not found or Deal not correspond to bid. Check the data.", exception.Message);
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace Tests.Services
             await bidService.Add(bidDTO);
             bidDTO.Value = 150.15M;
             await bidService.Update(bidDTO);
-            var dealUpdated = await bidService.Get(bidDTO.BidId);
+            var dealUpdated = await bidService.Get(bidDTO.DealId, bidDTO.BidId);
 
             // Assert
             Assert.NotNull(dealUpdated);
@@ -147,7 +147,7 @@ namespace Tests.Services
             );
 
             // Assert
-            Assert.Equal("Bids for deal not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Bids for deal not found", exception.Message);
         }
     }
 }

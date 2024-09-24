@@ -9,7 +9,7 @@ namespace src.Application.Interfaces
 
         Task<MessageDTO> Update(MessageDTO msg);
 
-        Task<MessageDTO> Get(int id);
+        Task<MessageDTO> Get(int dealId, int messageId);
 
         Task<List<MessageDTO>> GetAllByDeal(int dealId);
     }

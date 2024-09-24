@@ -28,16 +28,16 @@ namespace src.Domain.Entities
         [StringLength(255)]
         public required string Password { get; set; }
 
-        public required List<UserLocation> Locations { get; set; }
+        public virtual List<UserLocation>? Locations { get; set; }
 
-        public List<Deal>? Deals { get; set; }
+        public virtual List<Deal>? Deals { get; set; }
 
-        public List<Bid>? Bids { get; set; }
+        public virtual List<Bid>? Bids { get; set; }
 
-        public List<Message>? Messages { get; set; }
+        public virtual List<Message>? Messages { get; set; }
 
-        public List<Invite>? InvitesSent { get; set; }
+        public virtual List<Invite>? InvitesSent { get; set; }
 
-        public List<Invite>? InvitesReceived { get; set; }
+        public virtual List<Invite>? InvitesReceived { get; set; }
     }
 }

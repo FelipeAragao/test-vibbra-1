@@ -63,7 +63,7 @@ namespace Tests.Services
 
             // Act
             await inviteService.Add(inviteDTO);
-            var inviteGet = await inviteService.Get(inviteDTO.InviteId);
+            var inviteGet = await inviteService.Get(inviteDTO.UserId, inviteDTO.InviteId);
 
             // Assert
             Assert.NotNull(inviteGet);
@@ -81,11 +81,11 @@ namespace Tests.Services
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await inviteService.Get(40234)
+                await inviteService.Get(2345, 40234)
             );
 
             // Assert
-            Assert.Equal("Invite not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Invite not found or user not correspond to invite. Check the data.", exception.Message);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace Tests.Services
 
             // Act
             var inviteInserted = await inviteService.Add(inviteDTO);
-            var inviteGet = await inviteService.Get(inviteInserted.InviteId);
+            var inviteGet = await inviteService.Get(inviteInserted.UserId, inviteInserted.InviteId);
             inviteGet.Email = "outro@email.com";
             var invitePut = await inviteService.Update(inviteGet);
 
@@ -137,7 +137,7 @@ namespace Tests.Services
             );
 
             // Assert
-            Assert.Equal("Invites for user not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Invite not found or user not correspond to invite. Check the data.", exception.Message);
         }
     }
 }

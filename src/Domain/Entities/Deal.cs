@@ -31,9 +31,9 @@ namespace src.Domain.Entities
         [Required]
         public DealUrgencyType UrgencyType { get; set; }
 
-        public required DealLocation Location { get; set; }
+        public DealLocation? Location { get; set; }
 
-        public required List<DealImage> DealImages { get; set; }
+        public List<DealImage>? DealImages { get; set; }
 
         public List<Bid>? Bids { get; set; }
 

@@ -43,24 +43,7 @@ namespace Tests.Services
             });
 
             // Assert
-            Assert.Equal("Login already exists", exception.Message);
-        }
-
-        [Fact]
-        public async void Add_EnteringAllValidDataWithoutLocation_ThrowException()
-        {
-            // Arrange
-            var userService = new UserService(this._dbContext);
-            UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
-            userDTO.Location = null;
-
-            // Act
-            var exception = await Assert.ThrowsAsync<Exception>(async () =>
-                await userService.Add(userDTO)
-            );
-
-            // Assert
-            Assert.Equal("The location is incomplete or blank", exception.Message);
+            Assert.Equal("An unexpected error occurred: Login already exists", exception.Message);
         }
 
         [Fact]
@@ -89,7 +72,7 @@ namespace Tests.Services
             });
 
             // Assert
-            Assert.Equal("User not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: User not found", exception.Message);
         }
 
         [Fact]
@@ -126,7 +109,7 @@ namespace Tests.Services
             );
 
             // Assert
-            Assert.Equal("Login can't be changed", exception.Message);
+            Assert.Equal("An unexpected error occurred: Login can't be changed", exception.Message);
         }
     }
 }

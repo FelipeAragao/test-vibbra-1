@@ -18,8 +18,8 @@ namespace src.Application.DTOs
 
         public DealUrgencyType UrgencyType { get; set; }
 
-        public required LocationDTO Location { get; set; }
+        public LocationDTO? Location { get; set; }
 
-        public required List<DealImageDTO> DealImages { get; set; }
+        public List<DealImageDTO>? DealImages { get; set; }
     }
 }

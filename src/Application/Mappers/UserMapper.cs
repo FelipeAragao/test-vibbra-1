@@ -51,7 +51,7 @@ public static class UserMapper
             Email = userDTO.Email,
             Login = userDTO.Login,
             Password = userDTO.Password,
-            Locations = [ userLocation ]
+            Locations = userLocation == null ? null : [ userLocation ]
         };
     }
 
@@ -59,13 +59,26 @@ public static class UserMapper
     {
         if(userFrom.Location != null)
         {
-            userInto.Locations[0].Lat = userFrom.Location.Lat;
-            userInto.Locations[0].Lng = userFrom.Location.Lng;
-            userInto.Locations[0].Address = userFrom.Location.Address;
-            userInto.Locations[0].City = userFrom.Location.City;
-            userInto.Locations[0].State = userFrom.Location.State;
-            userInto.Locations[0].ZipCode = userFrom.Location.ZipCode;
-            userInto.Locations[0].Active = true;
+            if(userInto.Locations == null)
+                userInto.Locations = [ new UserLocation() {
+                Lat = userFrom.Location.Lat,
+                Lng = userFrom.Location.Lng,
+                Address = userFrom.Location.Address,
+                City = userFrom.Location.City,
+                State = userFrom.Location.State,
+                ZipCode = userFrom.Location.ZipCode,
+                Active = true
+                } ];
+            else
+            {
+                userInto.Locations[0].Lat = userFrom.Location.Lat;
+                userInto.Locations[0].Lng = userFrom.Location.Lng;
+                userInto.Locations[0].Address = userFrom.Location.Address;
+                userInto.Locations[0].City = userFrom.Location.City;
+                userInto.Locations[0].State = userFrom.Location.State;
+                userInto.Locations[0].ZipCode = userFrom.Location.ZipCode;
+                userInto.Locations[0].Active = true;
+            }
         }
 
         userInto.Name = userFrom.Name;

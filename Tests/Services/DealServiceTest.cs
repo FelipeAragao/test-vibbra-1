@@ -88,7 +88,7 @@ namespace Tests.Services
             );
 
             // Assert
-            Assert.Equal("Deal not found", exception.Message);
+            Assert.Equal("An unexpected error occurred: Deal not found", exception.Message);
         }
     }
 }

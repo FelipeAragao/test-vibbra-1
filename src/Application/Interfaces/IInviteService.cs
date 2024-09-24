@@ -8,7 +8,7 @@ namespace src.Application.Interfaces
 
         Task<InviteDTO> Update(InviteDTO inviteDTO);
 
-        Task<InviteDTO> Get(int id);
+        Task<InviteDTO> Get(int userId, int inviteId);
 
         Task<List<InviteDTO>> GetAllByUser(int userId);
     }

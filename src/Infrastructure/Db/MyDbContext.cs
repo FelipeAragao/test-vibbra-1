@@ -66,29 +66,30 @@ namespace src.Infrastructure.Db
             
             modelBuilder.Entity<User>().HasData(new User {
                 UserId = 1,
-                Name = "Teste",
-                Email = "teste@gmail.com",
-                Login = "teste",
+                Name = "Super User",
+                Email = "super@user.com",
+                Login = "super",
                 Password = PasswordHasher.HashPassword("123", salt),
                 Locations = new List<UserLocation>(),
                 Deals = null,
                 Bids = null
             });
 
-        modelBuilder.Entity<UserLocation>().HasData(new UserLocation {
-                UserLocationId = 1,
-                UserId = 1,
-                Lat = -23.55052,
-                Lng = -46.633308,
-                Address = "123 Main St",
-                City = "São Paulo",
-                State = "SP",
-                ZipCode = 12345
-            });
+            modelBuilder.Entity<UserLocation>().HasData(new UserLocation {
+                    UserLocationId = 1,
+                    UserId = 1,
+                    Lat = -23.55052,
+                    Lng = -46.633308,
+                    Address = "123 Main St",
+                    City = "São Paulo",
+                    State = "SP",
+                    ZipCode = 12345
+                });
 
             modelBuilder.Entity<Deal>()
                 .HasOne(d => d.Location)
                 .WithOne()
+                .HasForeignKey<DealLocation>(d => d.DealId)
                 .IsRequired();
 
             modelBuilder.Entity<Deal>()

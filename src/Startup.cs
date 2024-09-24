@@ -4,14 +4,14 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using src.Application.DTOs;
 using src.Application.Interfaces;
 using src.Application.Services;
 using src.Configurations;
+using src.Controllers.v1;
+using src.Infrastructure.Api;
 using src.Infrastructure.Db;
 
 namespace EcommerceVibbra
@@ -22,12 +22,15 @@ namespace EcommerceVibbra
 
         public Startup(IConfiguration configuration)
         {
+            DotNetEnv.Env.Load();
             this.Configuration = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<JwtSettings>(Configuration.GetSection("Jwt"));
+            services.Configure<CorreiosSettings>(Configuration.GetSection("CorreiosSettings"));
+            services.AddHttpClient<CorreiosPrecoApiService>();
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -42,12 +45,13 @@ namespace EcommerceVibbra
                 };
                 option.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context =>
+                    OnChallenge = context =>
                     {
-                        context.NoResult();
+                        context.HandleResponse();
                         context.Response.StatusCode = 401;
-                        context.Response.ContentType = "text/plain";
-                        return context.Response.WriteAsync("Invalid token.");
+                        context.Response.ContentType = "application/json";
+                        var result = JsonSerializer.Serialize(new { error = "Unauthorized access. Please provide a valid token." });
+                        return context.Response.WriteAsync(result);
                     }
                 };
             })
@@ -68,22 +72,17 @@ namespace EcommerceVibbra
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("JwtBearer", policy =>
+                options.AddPolicy("JwtOrGoogle", policy =>
                 {
                     policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
                 });
-            });
-
-            services.AddAuthorization(options =>
-            {
                 options.AddPolicy("GoogleSSO", policy =>
                 {
                     policy.AuthenticationSchemes.Add(GoogleDefaults.AuthenticationScheme);
                     policy.RequireAuthenticatedUser();
                 });
             });
-
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options => {
@@ -146,8 +145,15 @@ namespace EcommerceVibbra
                 options.LogoutPath = "/api/v1/authenticate/logout";
             });
 
-            services.AddScoped<ILoginService, LoginService>();
+            services.AddMemoryCache();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IDealService, DealService>();
+            services.AddScoped<IBidService, BidService>();
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IInviteService, InviteService>();
+            services.AddScoped<ITokenService, CorreiosTokenService>();
+            services.AddScoped<CorreiosTokenManager>();
+            services.AddScoped<ICorreiosPrecoApiService, CorreiosPrecoApiService>();
 
             services.AddControllersWithViews();
 
@@ -181,14 +187,14 @@ namespace EcommerceVibbra
             {
                 swaggerConfig.SwaggerEndpoint("/swagger/v1/swagger.json", "EcommerceVibbra v1");
 
-                // Configurações de OAuth para Google
+                // OAuth configuration for Google
                 swaggerConfig.OAuthClientId("your-google-client-id.apps.googleusercontent.com");
                 swaggerConfig.OAuthClientSecret("your-google-client-secret");
-                swaggerConfig.OAuthUsePkce();  // Usar PKCE
+                swaggerConfig.OAuthUsePkce();
 
                 // Se necessário, você também pode configurar mais opções do OAuth
-                swaggerConfig.OAuthScopeSeparator(" ");
-                swaggerConfig.OAuthUseBasicAuthenticationWithAccessCodeGrant();
+                /*swaggerConfig.OAuthScopeSeparator(" ");
+                swaggerConfig.OAuthUseBasicAuthenticationWithAccessCodeGrant();*/
             });
             app.UseRouting();
 

@@ -18,7 +18,7 @@ namespace Tests.Services
         public async void Login_WhenTryToLoginWithLoginAndPasswordCorrect_ReturnTheUser()
         {
             // Arrange
-            var loginService = new LoginService(this._dbContext);
+            var loginService = new UserService(this._dbContext);
             var loginDTO = new LoginDTO() {
                 Login = "teste",
                 Password = "123"
@@ -35,7 +35,7 @@ namespace Tests.Services
         public async void Login_WhenTryToLoginWithLoginAndPasswordCorrect_ReturnNull()
         {
             // Arrange
-            var loginService = new LoginService(this._dbContext);
+            var loginService = new UserService(this._dbContext);
             var loginDTO = new LoginDTO() {
                 Login = "teste_erro",
                 Password = "1234"
