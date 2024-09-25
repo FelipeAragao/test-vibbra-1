@@ -9,8 +9,6 @@ services:
       MYSQL_DATABASE: vibbra
     ports:
       - "3306:3306"
-    volumes:
-      - /Users/marciooshiro/Projects/DBs/BancosMySql:/var/lib/mysql
     networks:
       - ecommerce-network
 
