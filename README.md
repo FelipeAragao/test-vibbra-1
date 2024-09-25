@@ -60,11 +60,11 @@ Os apontamento das horas e atividades diárias foram feitas no portal.
 
 # REQUISITOS PARA RODAR A APLICAÇÃO
 
-A aplicação roda necessita do banco de dados MySql e um browser ou aplicação para testar as rotas, podendo ser o próprio Swagger via browser ou o Postman.
+Além da própria aplicação é necessário um banco de dados MySql e um browser ou aplicação para testar as rotas, podendo ser o próprio Swagger via browser ou o Postman. É importante também que a aplicação rode na porta 8080 pois o SSO do Google está configurado para o localhost:8080.
 
 Abaixo segue como subir a aplicação com o banco de dados.
 
-## 1. Via Docker
+## Via Docker
 
 Baixando o projeto é uma forma de gerar um release e preparar o ambiente. Segue como fazer:
 - Faça um clone do projeto:
@@ -77,3 +77,7 @@ Baixando o projeto é uma forma de gerar um release e preparar o ambiente. Segue
 > dotnet ef database update --project ./src/EcommerceVibbra.csproj
 
 Após isso é só acessar o Swagger em http://localhost:8080/swagger/index.html.
+
+## Apresentação
+
+Gravei também um vídeo mostrando algumas rotas da API e explicando alguns pontos. Ele pode ser visto [neste link](https://youtu.be/Y3Qk4z5i_Hs).
