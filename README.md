@@ -51,7 +51,7 @@ Foi enviado ao cliente a estimativa de horas de desenvolvimento e a data previst
 > - Testes: 13 horas
 > 
 > #### TOTAL: 32 horas
-> #### NÚMERO DE DIAS PARA ENTREGA: 6 DUAS
+> #### NÚMERO DE DIAS PARA ENTREGA: 6 DIAS
 
 ## APONTAMENTO DAS HORAS
 
@@ -66,17 +66,23 @@ Abaixo segue como subir a aplicação com o banco de dados.
 
 ## Via Docker
 
-Baixando o projeto é uma forma de gerar um release e preparar o ambiente. Segue como fazer:
+Neste processo o projeto em si nem é necessário, mas não encontrei outra forma de enviar o docker-compose e o arquivo SQL necessário. Portanto siga os seguintes passos:
 - Faça um clone do projeto:
 > git clone https://git.vibbra.com.br/marcio-1670964779/EcommerceVibbra.git
-- Na raiz do projeto entre na pasta Docker e então rode o seguinte comando:
+- Estando na raiz do projeto no Terminal ou no Prompt de Comando, entre na pasta Docker (comando "cd Docker") e então rode o seguinte comando:
 > docker-compose up -d
-- Com o docker compose subirão 2 conteineres, um do MySql e outro da aplicação Ecommerce Vibbra. Falta pouco!
-- Será necessário rodar o migrations para gerar o banco de dados.
-- Volte para a pasta raiz do projeto e entre na pasta src. Nele digite o seguinte comando: 
-> dotnet ef database update --project ./src/EcommerceVibbra.csproj
+- Com o docker compose subirão 2 conteineres, um do MySql e outro da aplicação Ecommerce Vibbra. Tudo pronto!
+- Não é necessário rodar o migrations para gerar o banco de dados, o docker-compose já fez isto.
 
-Após isso é só acessar o Swagger em http://localhost:8080/swagger/index.html.
+A Api já está disponível para fazer os testes.
+Para ter um primeiro acesso e poder cadastrar outros usuário utilize o login abaixo:
+> login: super
+>
+> senha: 123
+
+Ou utilize o SSO do Google para obter o token. Para isso é só acessa http://localhost:8080/api/v1/Authenticate/sso.
+
+O Swagger também está disponível em http://localhost:8080/swagger/index.html.
 
 ## Apresentação
 

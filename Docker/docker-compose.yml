@@ -1,12 +1,14 @@
 services:
 
   mysql:
-    image: mysql:latest # ou a versão que você está usando
+    image: mysql:latest
     container_name: mysql-docker
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: vibbra
+    volumes:
+      - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
     networks:
