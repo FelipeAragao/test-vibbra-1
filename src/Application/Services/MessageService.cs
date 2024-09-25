@@ -23,7 +23,7 @@ namespace src.Application.Services
         {
             try {
                 var msgEntity = MessageMapper.ToEntity(msg);
-                await this._context.AddAsync(msgEntity);
+                await this._context.Messages.AddAsync(msgEntity);
                 await this._context.SaveChangesAsync();
 
                 // Update MessageDTO
@@ -33,7 +33,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while adding the message. Details: {innerException}");
             }
             catch (Exception ex)
             {

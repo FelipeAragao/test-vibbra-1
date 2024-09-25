@@ -39,5 +39,7 @@ namespace src.Domain.Entities
         public virtual List<Invite>? InvitesSent { get; set; }
 
         public virtual List<Invite>? InvitesReceived { get; set; }
+
+        public virtual List<Delivery>? Deliveries { get; set; }
     }
 }

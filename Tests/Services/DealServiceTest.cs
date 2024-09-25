@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Tests.Services
 {
+    // Class to test the DealService
     public class DealServiceTest : IClassFixture<DbContextFixture>
     {
         private readonly MyDbContext _dbContext;
@@ -16,7 +17,7 @@ namespace Tests.Services
             this._dbContext = fixture.DbContext;
         }
 
-        /* Create a DealDTO */
+        // A method to centralize and standardize the user's creation on test
         public async Task<DealDTO> CreateDealDTO()
         {
             // Create user on Database
@@ -43,7 +44,24 @@ namespace Tests.Services
         }
 
         [Fact]
-        public async void Put_EnteringAllValidData_ReturnDealDTO()
+        public async void Add_EnteringAllValidDataWithoutLocation_ThrowException()
+        {
+            // Arrange
+            var dealService = new DealService(this._dbContext);
+            DealDTO dealDTO = await this.CreateDealDTO();
+            dealDTO.Location = null;
+
+            // Act
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+                await dealService.Add(dealDTO)
+            );
+
+            // Assert
+            Assert.Equal("An unexpected error occurred: The location is incomplete or blank", exception.Message);
+        }
+
+        [Fact]
+        public async void Update_EnteringAllValidData_ReturnDealDTO()
         {
             // Arrange
             var dealService = new DealService(this._dbContext);
@@ -80,7 +98,6 @@ namespace Tests.Services
         {
             // Arrange
             var dealService = new DealService(this._dbContext);
-            DealDTO dealDTO = await this.CreateDealDTO();
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () =>

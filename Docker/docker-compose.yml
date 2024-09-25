@@ -1,0 +1,28 @@
+services:
+
+  mysql:
+    image: mysql:latest # ou a versão que você está usando
+    container_name: mysql-docker
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: vibbra
+    ports:
+      - "3306:3306"
+    networks:
+      - ecommerce-network
+
+  app:
+    image: oshiromarcio/ecommercevibbra:latest
+    container_name: vibbra
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - ecommerce-network
+    depends_on:
+      - mysql
+
+networks:
+  ecommerce-network:
+    driver: bridge

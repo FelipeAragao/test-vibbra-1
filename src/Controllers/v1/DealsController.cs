@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using src.Application.DTOs;
 using src.Application.Interfaces;
+using src.Application.Mappers;
 
 namespace src.Controllers.v1
 {
@@ -13,14 +14,16 @@ namespace src.Controllers.v1
         private readonly IDealService _dealService;
         private readonly IBidService _bidService;
         private readonly IMessageService _messageService;
+        private readonly IDeliveryService _deliveryService;
 
         public DealsController(ICorreiosPrecoApiService correiosPriceService, IDealService dealService, IBidService bidService,
-            IMessageService messageService)
+            IMessageService messageService, IDeliveryService deliveryService)
         {
             this._correiosPriceService = correiosPriceService;
             this._dealService = dealService;
             this._bidService = bidService;
             this._messageService = messageService;
+            this._deliveryService = deliveryService;
         }
 
         [Authorize("JwtOrGoogle")]
@@ -61,8 +64,7 @@ namespace src.Controllers.v1
             }
         }
 
-        [Authorize("JwtOrGoogle")]
-        [HttpGet("/{dealId}/bids/{bidId}")]
+        [HttpGet("{dealId}/bids/{bidId}")]
         public async Task<IActionResult> GetBid([FromRoute] int dealId, [FromRoute] int bidId)
         {
             try {
@@ -74,8 +76,7 @@ namespace src.Controllers.v1
             }
         }
 
-        [Authorize("JwtOrGoogle")]
-        [HttpGet("/{dealId}/bids")]
+        [HttpGet("{dealId}/bids")]
         public async Task<IActionResult> GetBidsByDeal([FromRoute] int dealId)
         {
             try {
@@ -114,8 +115,7 @@ namespace src.Controllers.v1
             }
         }
 
-        [Authorize("JwtOrGoogle")]
-        [HttpGet("/{dealId}/messages/{messageId}")]
+        [HttpGet("{dealId}/messages/{messageId}")]
         public async Task<IActionResult> GetMessage([FromRoute] int dealId, [FromRoute] int messageId)
         {
             try {
@@ -127,8 +127,7 @@ namespace src.Controllers.v1
             }
         }
 
-        [Authorize("JwtOrGoogle")]
-        [HttpGet("/{dealId}/messages")]
+        [HttpGet("{dealId}/messages")]
         public async Task<IActionResult> GetMessagesByDeal([FromRoute] int dealId)
         {
             try {
@@ -167,19 +166,29 @@ namespace src.Controllers.v1
             }
         }
 
-        // Delivery with Bid accepted
-        /*[Authorize("JwtOrGoogle")]
         [HttpGet("{dealId}/deliveries")]
         public async Task<IActionResult> GetDeliveriesByDeal([FromRoute] int dealId)
         {
             try {
-                var deal = await this._dealService.Get(dealId);
-                var bids = await this._bidService.GetAllByDeal(dealId);
-                foreach
+                var delivery = await this._deliveryService.Get(dealId);
+                return Ok(delivery);
             }
             catch (Exception ex) {
                 return StatusCode(500, new { error = ex.Message });
             }
-        }*/
+        }
+
+        [Authorize("JwtOrGoogle")]
+        [HttpPost("{dealId}/deliveries")]
+        public async Task<IActionResult> AddDelivery([FromRoute] int dealId, [FromBody] int user_id)
+        {
+            try {
+                var delivery = await this._deliveryService.Add(dealId, user_id);
+                return Ok(delivery);
+            }
+            catch (Exception ex) {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }

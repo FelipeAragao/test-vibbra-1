@@ -46,7 +46,7 @@ namespace src.Controllers.v1
 
             try {
                 await this._userService.Add(userDTO);
-                return Ok(userDTO);
+                return Created("", userDTO);
             }
             catch (Exception ex) {
                 return StatusCode(500, new { error = ex.Message });
@@ -67,7 +67,7 @@ namespace src.Controllers.v1
         }
 
         [Authorize("JwtOrGoogle")]
-        [HttpGet("/{userId}/invites/{inviteId}")]
+        [HttpGet("{userId}/invites/{inviteId}")]
         public async Task<IActionResult> GetMessage([FromRoute] int userId, [FromRoute] int inviteId)
         {
             try {
@@ -80,7 +80,7 @@ namespace src.Controllers.v1
         }
 
         [Authorize("JwtOrGoogle")]
-        [HttpGet("/{userId}/invites")]
+        [HttpGet("{userId}/invites")]
         public async Task<IActionResult> GetInvitesByUser([FromRoute] int userId)
         {
             try {
@@ -98,7 +98,7 @@ namespace src.Controllers.v1
         {
             try {
                 inviteDTO.UserId = userId;
-                return Ok(await this._inviteService.Add(inviteDTO));
+                return Created("", await this._inviteService.Add(inviteDTO));
             }
             catch (Exception ex) {
                 return StatusCode(500, new { error = ex.Message });

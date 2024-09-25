@@ -7,7 +7,14 @@ namespace src.Application.DTOs
 {
     public class DeliveryDTO
     {
-        public required DealDTO DealDTO { get; set; }
-        public required BidDTO BidDTO { get; set; }
+        public int DeliveryId { get; set; }
+
+        public int DealId { get; set; }
+
+        public int UserId { get; set; }
+
+        public decimal DeliveryPrice { get; set; }
+        
+        public List<DeliveryStepsDTO>? Steps { get; set; }
     }
 }

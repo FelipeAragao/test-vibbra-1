@@ -38,5 +38,7 @@ namespace src.Domain.Entities
         public List<Bid>? Bids { get; set; }
 
         public List<Message>? Messages { get; set; }
+
+        public Delivery? Delivery { get; set; }
     }
 }

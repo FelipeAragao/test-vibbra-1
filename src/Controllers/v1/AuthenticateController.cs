@@ -15,6 +15,7 @@ using src.Configurations;
 
 namespace src.Controllers.v1
 {
+    // Controllers for Authentication 
     [ApiController]
     [Route("api/v1/[controller]")]
     public class AuthenticateController : Controller
@@ -28,6 +29,7 @@ namespace src.Controllers.v1
             this._jwtSettings = jwtSettings.Value;
         }
 
+        // Centralize the Token's generation
         private string GenerateJwtToken(IEnumerable<Claim> claims)
         {
             var key = this._jwtSettings.Key;
@@ -100,7 +102,7 @@ namespace src.Controllers.v1
                         return Unauthorized(new { error = "Unauthorized. Invalid name or e-mail." });
                     }
 
-                    // Get or add the new user
+                    // Get or add the user on SSO logins (all users must be registered)
                     var userDTO = await this._userService.GetByLogin(emailClaim);
                     if (userDTO == null)
                     {
@@ -133,16 +135,8 @@ namespace src.Controllers.v1
             }
             catch (Exception ex)
             {
-                // Log do erro e detalhes
                 return BadRequest(new { error = "An error occurred during the Google login process. " + ex.Message });
             }
-        }
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok();
         }
     }
 }

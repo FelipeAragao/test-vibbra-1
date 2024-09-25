@@ -77,7 +77,6 @@ namespace Tests.Services
         {
             // Arrange
             var messageService = new MessageService(this._dbContext);
-            MessageDTO messageDTO = await this.CreateMessageDTO();
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () =>

@@ -11,6 +11,7 @@ namespace src.Domain.Entities
         public int InviteId { get; set; }
 
         [Required]
+        [ForeignKey("User")]
         public required int UserId { get; set; }
 
         [Required]

@@ -151,6 +151,7 @@ namespace EcommerceVibbra
             services.AddScoped<IBidService, BidService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IInviteService, InviteService>();
+            services.AddScoped<IDeliveryService, DeliveryService>();
             services.AddScoped<ITokenService, CorreiosTokenService>();
             services.AddScoped<CorreiosTokenManager>();
             services.AddScoped<ICorreiosPrecoApiService, CorreiosPrecoApiService>();

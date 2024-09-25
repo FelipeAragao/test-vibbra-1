@@ -9,6 +9,7 @@ using Tests.Configuration;
 
 namespace Tests.Utilities
 {
+    // Classe to centralize the faker's creation of DTOs
     public static class RandomDataGenerator
     {
         public static UserDTO GenerateUserDTO()
@@ -98,6 +99,27 @@ namespace Tests.Utilities
             inviteDTO.UserInvitedId = userInvitedId;
 
             return inviteDTO;
+        }
+
+        public static DeliveryDTO GenerateDeliveryDTO(int dealId, int userId)
+        {
+            DeliveryDTO deliveryDTO = new AutoFaker<DeliveryDTO>(AutoBogusConfiguration.LOCATE)
+                .Ignore(d => d.DeliveryId);
+            deliveryDTO.DealId = dealId;
+            deliveryDTO.UserId = userId;
+
+            deliveryDTO.Steps = [ GenerateDeliveryStepsDTO(), GenerateDeliveryStepsDTO(), GenerateDeliveryStepsDTO() ];
+
+            return deliveryDTO;
+        }
+
+        public static DeliveryStepsDTO GenerateDeliveryStepsDTO()
+        {
+            DeliveryStepsDTO stepsDTO = new AutoFaker<DeliveryStepsDTO>(AutoBogusConfiguration.LOCATE)
+                .Ignore(s => s.DeliveryStepsId)
+                .Ignore(s => s.DeliveryId);
+
+            return stepsDTO;
         }
     }
 }

@@ -28,7 +28,7 @@ namespace src.Application.Services
                 }
 
                 var dealEntity = DealMapper.ToEntity(deal);
-                await this._context.AddAsync(dealEntity);
+                await this._context.Deals.AddAsync(dealEntity);
                 await this._context.SaveChangesAsync();
 
                 // Update DealDTO
@@ -46,7 +46,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while adding the deal. Details: {innerException}");
             }
             catch (Exception ex)
             {

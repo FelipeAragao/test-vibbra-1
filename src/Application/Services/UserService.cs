@@ -68,7 +68,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while adding the user. Details: {innerException}");
             }
             catch (Exception ex)
             {
@@ -108,7 +108,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while updating the user. Details: {innerException}");
             }
             catch (Exception ex)
             {

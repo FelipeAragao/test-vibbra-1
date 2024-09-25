@@ -19,7 +19,7 @@ namespace Tests.Services
             this._dbContext = fixture.DbContext;
         }
 
-        /* Create a BidDTO with a user (created by the method or received) and a deal (created by the method or received) */
+        // A method to centralize and standardize the bid's creation on test
         public async Task<BidDTO> CreateBidDTO(int userIdForDeal = 0, int dealId = 0)
         {
             UserService userService = new UserService(this._dbContext);

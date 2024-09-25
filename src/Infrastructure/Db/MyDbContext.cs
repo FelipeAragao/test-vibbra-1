@@ -18,6 +18,7 @@ namespace src.Infrastructure.Db
         public DbSet<Deal> Deals { get; set; }
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Delivery> Deliveries { get; set; }
         public DbSet<Invite> Invites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,6 +47,12 @@ namespace src.Infrastructure.Db
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Messages)
+                .WithOne()
+                .HasForeignKey(m => m.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Deliveries)
                 .WithOne()
                 .HasForeignKey(m => m.UserId)
                 .IsRequired();
@@ -110,6 +117,19 @@ namespace src.Infrastructure.Db
                 .HasForeignKey(m => m.DealId)
                 .IsRequired();
 
+            modelBuilder.Entity<Deal>()
+                .HasOne(d => d.Delivery)
+                .WithOne()
+                .HasForeignKey<Delivery>(d => d.DealId)
+                .IsRequired();
+/*
+            modelBuilder.Entity<Delivery>()
+                .HasMany(d => d.Steps)
+                .WithOne()
+                .HasForeignKey(d => d.DeliveryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+*/
             base.OnModelCreating(modelBuilder);
         }
 

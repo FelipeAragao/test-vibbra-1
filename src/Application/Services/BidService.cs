@@ -19,7 +19,7 @@ namespace src.Application.Services
         {
             try {
                 var bidEntity = BidMapper.ToEntity(bid);
-                await this._context.AddAsync(bidEntity);
+                await this._context.Bids.AddAsync(bidEntity);
                 await this._context.SaveChangesAsync();
 
                 // Update BidDTO
@@ -30,7 +30,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while adding the deal. Details: {innerException}");
             }
             catch (Exception ex)
             {

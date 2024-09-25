@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EcommerceVibbra.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateBase : Migration
+    public partial class CompleteDev : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -206,6 +207,34 @@ namespace EcommerceVibbra.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Deliveries",
+                columns: table => new
+                {
+                    DeliveryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    DealId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    DeliveryPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Deliveries", x => x.DeliveryId);
+                    table.ForeignKey(
+                        name: "FK_Deliveries_Deals_DealId",
+                        column: x => x.DealId,
+                        principalTable: "Deals",
+                        principalColumn: "DealId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Deliveries_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
@@ -236,10 +265,33 @@ namespace EcommerceVibbra.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "DeliverySteps",
+                columns: table => new
+                {
+                    DeliveryStepsId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    DeliveryId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DeliveryStatus = table.Column<int>(type: "int", nullable: false),
+                    Active = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeliverySteps", x => x.DeliveryStepsId);
+                    table.ForeignKey(
+                        name: "FK_DeliverySteps_Deliveries_DeliveryId",
+                        column: x => x.DeliveryId,
+                        principalTable: "Deliveries",
+                        principalColumn: "DeliveryId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "UserId", "Email", "Login", "Name", "Password" },
-                values: new object[] { 1, "teste@gmail.com", "teste", "Teste", "MsEkloY7sm15dfU37IvOi66ianpBCu28vm7H8GtMy+g=:Fk81x1cHJcus5mIKlDFiyQ==" });
+                values: new object[] { 1, "super@user.com", "super", "Super User", "sQYVruLpNUD+dTbZGoDQc4QWpPyuwcA3mv7nYpp6eCA=:4ZRWQMD+f+980pqysc9s+g==" });
 
             migrationBuilder.InsertData(
                 table: "UserLocations",
@@ -271,6 +323,22 @@ namespace EcommerceVibbra.Migrations
                 name: "IX_Deals_UserId",
                 table: "Deals",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Deliveries_DealId",
+                table: "Deliveries",
+                column: "DealId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Deliveries_UserId",
+                table: "Deliveries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeliverySteps_DeliveryId",
+                table: "DeliverySteps",
+                column: "DeliveryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invites_UserId",
@@ -311,6 +379,9 @@ namespace EcommerceVibbra.Migrations
                 name: "DealLocation");
 
             migrationBuilder.DropTable(
+                name: "DeliverySteps");
+
+            migrationBuilder.DropTable(
                 name: "Invites");
 
             migrationBuilder.DropTable(
@@ -318,6 +389,9 @@ namespace EcommerceVibbra.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserLocations");
+
+            migrationBuilder.DropTable(
+                name: "Deliveries");
 
             migrationBuilder.DropTable(
                 name: "Deals");

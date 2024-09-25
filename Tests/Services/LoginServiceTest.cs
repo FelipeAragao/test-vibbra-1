@@ -20,7 +20,7 @@ namespace Tests.Services
             // Arrange
             var loginService = new UserService(this._dbContext);
             var loginDTO = new LoginDTO() {
-                Login = "teste",
+                Login = "super",
                 Password = "123"
             };
 

@@ -20,7 +20,7 @@ namespace src.Application.Services
         {
             try {
                 var inviteEntity = Mappers.InviteMapper.ToEntity(inviteDTO);
-                await this._context.AddAsync(inviteEntity);
+                await this._context.Invites.AddAsync(inviteEntity);
                 await this._context.SaveChangesAsync();
 
                 // Update InviteDTO
@@ -30,7 +30,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while adding the invite. Details: {innerException}");
             }
             catch (Exception ex)
             {
@@ -100,7 +100,7 @@ namespace src.Application.Services
             catch (DbUpdateException dbEx)
             {
                 var innerException = dbEx.InnerException?.Message;
-                throw new Exception($"An error occurred while updating the deal. Details: {innerException}");
+                throw new Exception($"An error occurred while updating the invite. Details: {innerException}");
             }
             catch (Exception ex)
             {

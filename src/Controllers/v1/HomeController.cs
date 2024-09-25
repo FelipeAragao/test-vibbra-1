@@ -13,31 +13,7 @@ namespace src.Controllers.v1
         [HttpGet("/")]
         public IActionResult LoginGoogle()
         {
-            return Ok("Hello world");
+            return Ok("Welcome!");
         }
-/*
-        [HttpGet("signin-google")]
-        public async Task<IActionResult> LoginGoogleCallback()
-        {
-            try
-            {
-                var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                if (result?.Succeeded == true)
-                {
-                    // User's authenticated data
-                    var userClaims = result.Principal.Claims;
-
-                    var token = "abc"; //GenerateJwtToken(userClaims);
-                    return Ok(new { token });
-                }
-                return Unauthorized(new { error = "Unauthorized" });
-            }
-            catch (Exception ex)
-            {
-                // Log do erro e detalhes
-                Console.WriteLine(ex.Message);
-                return BadRequest(new { error = "An error occurred during the Google login process." });
-            }
-        }*/
     }
 }

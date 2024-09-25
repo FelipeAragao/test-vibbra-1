@@ -34,7 +34,7 @@ namespace Tests.Services
             // Arrange
             var userService = new UserService(this._dbContext);
             UserDTO userDTO = RandomDataGenerator.GenerateUserDTO();
-            userDTO.Login = "teste";
+            userDTO.Login = "super";
 
             // Act
             var exception = await Assert.ThrowsAsync<Exception>(async () => 
